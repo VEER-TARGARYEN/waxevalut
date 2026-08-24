@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/recall/SearchBar";
 import { FactCard } from "@/components/recall/FactCard";
 import { RedactionCard } from "@/components/recall/RedactionCard";
 import { TokenSavings } from "@/components/recall/TokenSavings";
+import { ExploreGraph } from "@/components/recall/ExploreGraph";
 import { Skeleton } from "@/components/ui/primitives";
 import { DUR, EASE_OUT, feedContainer } from "@/lib/motion";
 
@@ -26,12 +27,13 @@ export function RecallPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[760px] px-4 md:px-6">
-      {/* search — centered hero when idle, docks upward once a query is active */}
+    <div className="mx-auto w-full max-w-[760px] px-4 pb-24 md:px-6">
+      {/* search — a compact hero when idle (leaving room for Explore below), docks upward
+          once a query is active */}
       <motion.div
         layout
         transition={{ duration: DUR.spatial, ease: EASE_OUT }}
-        style={{ paddingTop: active ? "28px" : "22vh" }}
+        style={{ paddingTop: active ? "28px" : "11vh" }}
       >
         {!active && (
           <motion.div
@@ -40,7 +42,7 @@ export function RecallPage() {
             transition={{ duration: DUR.context, ease: EASE_OUT }}
             className="mb-6 text-center"
           >
-            <h1 className="text-[26px] font-600 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+            <h1 className="text-[27px] font-600 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
               What do you want to know?
             </h1>
             <p className="mt-2 text-[14px]" style={{ color: "var(--color-ink-3)" }}>
@@ -53,6 +55,9 @@ export function RecallPage() {
 
         {!active && <ExampleChips onPick={setQuery} />}
       </motion.div>
+
+      {/* browse entry point — fills the idle home page with everything in the graph */}
+      {!active && <ExploreGraph />}
 
       {/* results */}
       <AnimatePresence mode="wait">

@@ -40,6 +40,16 @@ export function useAutocomplete(q: string) {
   });
 }
 
+/** The full entity list (empty-query browse) — powers the landing page Explore section and
+ *  the command palette's empty state. */
+export function useEntityBrowse() {
+  return useQuery({
+    queryKey: ["entities", "__browse__"],
+    queryFn: ({ signal }) => api.entities("", signal),
+    staleTime: 60_000,
+  });
+}
+
 export function useRecall(agentId: string, query: string) {
   return useQuery({
     queryKey: keys.recall(agentId, query),

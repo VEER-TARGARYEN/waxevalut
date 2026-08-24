@@ -55,6 +55,15 @@ ORDER BY e.name
 LIMIT 10
 """
 
+# Browse list for an empty query - powers the landing page's "Explore" section and the
+# command palette's empty state. Grouped by kind on the client.
+BROWSE_ENTITIES = """
+MATCH (e:Entity)
+RETURN e.name AS name, e.kind AS kind
+ORDER BY e.kind, e.name
+LIMIT 100
+"""
+
 GET_AGENT = """
 MATCH (a:Agent {id: $agent_id})
 RETURN a.id AS id, a.name AS name, a.role AS role, a.clearance AS clearance

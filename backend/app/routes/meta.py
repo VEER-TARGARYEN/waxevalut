@@ -27,8 +27,7 @@ def agents() -> list[dict]:
 
 @router.get("/entities")
 def entities(q: str = "") -> list[dict]:
-    """Autocomplete for the search box and the observation form."""
-    if not q.strip():
-        return []
-    rows = db.run(Q.AUTOCOMPLETE_ENTITIES, {"q": q})
+    """Entity lookup. A query filters by name (autocomplete); an empty query returns the
+    full browse list that the landing page and command palette render."""
+    rows = db.run(Q.AUTOCOMPLETE_ENTITIES, {"q": q}) if q.strip() else db.run(Q.BROWSE_ENTITIES)
     return [{"name": r["name"], "kind": r["kind"]} for r in rows]

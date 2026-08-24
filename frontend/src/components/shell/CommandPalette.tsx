@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAutocomplete } from "@/hooks/queries";
+import { useAutocomplete, useEntityBrowse } from "@/hooks/queries";
 import { useApp } from "@/store/app";
 import { DUR, EASE_OUT } from "@/lib/motion";
 import { KindGlyph, Search, Plus, GraphIcon } from "@/components/ui/icons";
@@ -16,7 +16,10 @@ export function CommandPalette() {
   const [i, setI] = useState(0);
   const nav = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { data: suggestions } = useAutocomplete(q);
+  const { data: filtered } = useAutocomplete(q);
+  const { data: browse } = useEntityBrowse();
+  // empty query -> show the whole graph (capped); a query -> filtered matches
+  const suggestions = q.trim() ? filtered : (browse ?? []).slice(0, 8);
 
   // global ⌘K / Ctrl-K
   useEffect(() => {

@@ -99,7 +99,13 @@ export const mockApi: Api = {
     await delay(90);
     signal?.throwIfAborted?.();
     const ql = q.trim().toLowerCase();
-    if (!ql) return [];
+    // Empty query returns a browse list (the whole graph) so the landing page and the
+    // command palette have something to show; a real query filters by name.
+    if (!ql) {
+      return [...ENTITIES]
+        .sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name))
+        .map((e) => ({ name: e.name, kind: e.kind }));
+    }
     return ENTITIES.filter((e) => e.name.toLowerCase().includes(ql))
       .slice(0, 10)
       .map((e) => ({ name: e.name, kind: e.kind }));
