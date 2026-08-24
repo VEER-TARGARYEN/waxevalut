@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+/*
+  WaxeValut design system.
+
+  Identity: a vault of sealed organizational memory. The name fuses "vault" (secure,
+  layered store of records) with the wax seal (authenticity, provenance). So the palette is
+  a cool, near-black charcoal foundation lit by a single warm brass/amber accent - the wax
+  seal - reserved strictly for interaction and focus. Data classifications get their own
+  quiet, low-saturation semantic hues that never compete with the brass.
+
+  Dark-committed by design (this is an investigation console, not a document), so there is
+  one palette, painted explicitly.
+*/
+
+@theme {
+  /* ── foundation: cool charcoal, faint blue undertone ── */
+  --color-base: #0b0c0e; /* app background */
+  --color-surface-1: #121317; /* raised panels */
+  --color-surface-2: #191b20; /* cards, inputs */
+  --color-surface-3: #212429; /* hover / elevated */
+  --color-line: #26292f; /* hairline borders */
+  --color-line-strong: #333740;
+
+  --color-ink: #eceef2; /* primary text */
+  --color-ink-2: #a4a9b4; /* secondary text */
+  --color-ink-3: #6f747f; /* tertiary / metadata */
+  --color-ink-4: #4a4e57; /* faint */
+
+  /* ── brand accent: the wax seal. Warm brass. Used sparingly. ── */
+  --color-brass: #e0a860;
+  --color-brass-bright: #f0ba72;
+  --color-brass-dim: #8a6a3e;
+  --color-brass-wash: #22 1c 12; /* placeholder, real value below */
+  --color-brass-glow: rgba(224, 168, 96, 0.14);
+
+  /* ── data classification semantics (quiet, never louder than brass) ── */
+  --color-public: #7b8592; /* neutral slate - understated */
+  --color-internal: #6b93c4; /* calm blue */
+  --color-pii: #b985c9; /* violet - distinct */
+  --color-secret: #cf6f7e; /* rose - warm caution, not alarm-red */
+
+  /* ── functional ── */
+  --color-ok: #6bbf8a;
+  --color-warn: #d8a24a;
+  --color-danger: #d76a6a; /* reserved for real errors only */
+
+  /* ── type ── */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── motion timing (coherent scale, per directive) ── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 130ms;
+  --dur-normal: 220ms;
+  --dur-context: 340ms;
+  --dur-spatial: 500ms;
+
+  /* radii - restrained, not everything pill-round */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+/* real brass wash (theme block above can't do space-separated hex safely) */
+:root {
+  --brass-wash: rgba(224, 168, 96, 0.08);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.02) inset,
+    0 12px 40px -18px rgba(0, 0, 0, 0.7);
+  --shadow-pop: 0 20px 60px -20px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--color-line);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
+  /* faint vignette + a single soft brass light-source top-left, so the base isn't flat */
+  background-image: radial-gradient(
+      1200px 600px at 12% -8%,
+      rgba(224, 168, 96, 0.05),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at 100% 0%, rgba(107, 147, 196, 0.04), transparent 55%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(224, 168, 96, 0.24);
+  color: #fff;
+}
+
+/* focus: brass ring, always visible for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* scrollbars - thin, unobtrusive */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #444a54;
+  background-clip: content-box;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* number transitions for the token meter etc. */
+@property --num {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* utility: monospaced tabular figures for aligned numbers */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* utility: subtle top-lit panel surface */
+.panel {
+  background: linear-gradient(180deg, var(--color-surface-1), var(--color-base));
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+/* hairline divider */
+.hair {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-line), transparent);
+}
+
+/* evidence cards / interactive rows: a subtle tactile lift on hover (pointer devices only,
+   so it never triggers on touch). CSS-driven so it stays smooth independent of JS. */
+.evidence {
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out),
+    background var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) {
+  /* shadow-based lift, not transform — FactCard carries framer's `layout`, which owns the
+     transform property; a CSS transform here would fight it. */
+  .evidence:hover {
+    border-color: var(--color-line-strong);
+    box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* the brass underline used on active nav / focus states */
+.brass-underline {
+  position: relative;
+}
+.brass-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--color-brass);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--color-brass-glow);
+}

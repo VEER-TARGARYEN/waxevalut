@@ -1,0 +1,9 @@
+# Pinned for reproducibility. Python 3.11+. All ship prebuilt wheels for 3.12-3.14, so this
+# installs on any current host without a compiler (a lesson from the benchmark repo, where an
+# unpinnable matplotlib OOM-killed a small VM building from source).
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+neo4j==5.28.1            # official driver - CognoDB speaks Bolt 5.0-5.4, connects unmodified
+python-dotenv==1.0.1
+pydantic==2.10.4
