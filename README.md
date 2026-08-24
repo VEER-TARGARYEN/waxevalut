@@ -14,7 +14,7 @@ authorized context, and provenance**.
 
 | | |
 |---|---|
-| **Live demo** | _deploy link here_ |
+| **Live demo** | _deploy link here_ (see [DEPLOY.md](DEPLOY.md) — ~3 min on Vercel) |
 | **Walkthrough** | _recording link here_ |
 | **Backend** | FastAPI + official Neo4j driver → CognoDB · [`backend/`](backend/) |
 | **Frontend** | React + Vite + TypeScript · [`frontend/`](frontend/) |

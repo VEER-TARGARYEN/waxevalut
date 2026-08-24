@@ -1,0 +1,14 @@
+# Netlify config for the WaxeValut frontend (alternative to Vercel — use whichever you prefer).
+# Deploy: Netlify -> Add new site -> Import from Git -> pick this repo, base directory "frontend".
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback: client-side routes like /entity/:name and /graph must serve index.html
+# rather than 404 on a hard refresh.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
