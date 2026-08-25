@@ -8,7 +8,7 @@ import { useEntity } from "@/hooks/queries";
 import { useApp } from "@/store/app";
 import { FactCard } from "@/components/recall/FactCard";
 import { RedactionCard } from "@/components/recall/RedactionCard";
-import { Timeline } from "@/components/entity/Timeline";
+import { Timeline, type TimeMark } from "@/components/entity/Timeline";
 import { CorrectionTrail } from "@/components/entity/CorrectionTrail";
 import { Impact } from "@/components/entity/Impact";
 import { GraphView } from "@/components/graph/GraphView";
@@ -51,6 +51,17 @@ export function EntityPage() {
 
   const kind = data?.entity.kind;
   const factCount = data?.facts.length ?? 0;
+
+  // fact-density marks for the timeline: every visible fact + both ends of each correction
+  const timeMarks = useMemo<TimeMark[]>(() => {
+    if (!data) return [];
+    const ms: TimeMark[] = data.facts.map((f) => ({ t: new Date(f.observed_at).getTime(), kind: "fact" as const }));
+    for (const c of data.corrections) {
+      ms.push({ t: new Date(c.new.observed_at).getTime(), kind: "correction" as const });
+      ms.push({ t: new Date(c.old.observed_at).getTime(), kind: "fact" as const });
+    }
+    return ms.filter((m) => !Number.isNaN(m.t));
+  }, [data]);
 
   const header = useMemo(
     () => (
@@ -134,7 +145,7 @@ export function EntityPage() {
               )}
               {tab === "timeline" && (
                 <div className="flex flex-col gap-5">
-                  <Timeline asOf={asOf} onChange={setAsOf} loading={isFetching} />
+                  <Timeline asOf={asOf} onChange={setAsOf} loading={isFetching} marks={timeMarks} />
                   {data && data.corrections.length > 0 && (
                     <section>
                       <SectionLabel>Corrections</SectionLabel>
