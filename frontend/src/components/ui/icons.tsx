@@ -124,37 +124,56 @@ export const Return = (p: P) => (
   </svg>
 );
 
-/** Entity-kind glyphs for suggestions and graph legends. */
+/** Entity-kind glyphs — crafted, distinctive marks (not generic outlines). Each says what
+ *  the entity IS at a glance: an account is a columned vault, a service is a hex node, an
+ *  incident is a live alert, a project is a milestone flag. */
 export function KindGlyph({ kind, ...p }: P & { kind?: string }) {
   switch (kind) {
-    case "account":
+    case "account": // columned vault / institution
       return (
         <svg {...base(p)}>
-          <path d="M4 20V8l8-4 8 4v12M4 20h16M9 20v-5h6v5" />
+          <path d="M4 20h16M5.5 20v-9M18.5 20v-9M9.5 20v-9M14.5 20v-9" />
+          <path d="M3.5 11l8.5-6 8.5 6z" />
+          <path d="M8 8.2h8" />
         </svg>
       );
-    case "service":
-      return <Api {...p} />;
-    case "person":
-      return <Person {...p} />;
-    case "incident":
+    case "service": // hexagonal node with a pulsing core + spokes
       return (
         <svg {...base(p)}>
-          <path d="M12 4l9 16H3z" />
-          <path d="M12 10v4M12 17h.01" />
+          <path d="M12 3l7.5 4.3v9.4L12 21l-7.5-4.3V7.3z" />
+          <circle cx="12" cy="12" r="2.2" />
+          <path d="M12 7.4v2.4M12 14.2V16.6M8.6 9.7l2 1.2M15.4 9.7l-2 1.2" />
         </svg>
       );
-    case "project":
+    case "person": // refined avatar with collar
       return (
         <svg {...base(p)}>
-          <rect x="4" y="6" width="16" height="14" rx="2" />
-          <path d="M8 6V4h8v2M8 12h8M8 16h5" />
+          <circle cx="12" cy="8.2" r="3.4" />
+          <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" />
+          <path d="M9.3 15.6L12 18l2.7-2.4" />
+        </svg>
+      );
+    case "incident": // live alert — diamond with rays
+      return (
+        <svg {...base(p)}>
+          <path d="M12 3.5l8.5 8.5L12 20.5 3.5 12z" />
+          <path d="M12 8.5v4M12 15.4h.01" />
+          <path d="M12 1.6V0.6M22.4 12h1M12 22.4v1M0.6 12h1" opacity="0.55" />
+        </svg>
+      );
+    case "project": // milestone flag
+      return (
+        <svg {...base(p)}>
+          <path d="M6 21V4" />
+          <path d="M6 4.5h11l-2.4 3.2L17 11H6" />
+          <circle cx="6" cy="3" r="1.1" />
         </svg>
       );
     default:
       return (
         <svg {...base(p)}>
-          <circle cx="12" cy="12" r="7" />
+          <path d="M12 3l7.5 4.3v9.4L12 21l-7.5-4.3V7.3z" />
+          <circle cx="12" cy="12" r="2" />
         </svg>
       );
   }

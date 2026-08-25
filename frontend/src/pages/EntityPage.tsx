@@ -13,7 +13,8 @@ import { CorrectionTrail } from "@/components/entity/CorrectionTrail";
 import { Impact } from "@/components/entity/Impact";
 import { GraphView } from "@/components/graph/GraphView";
 import { Skeleton } from "@/components/ui/primitives";
-import { KindGlyph, Plus } from "@/components/ui/icons";
+import { Plus } from "@/components/ui/icons";
+import { SealAvatar } from "@/components/ui/SealAvatar";
 import { feedContainer, DUR, EASE_OUT } from "@/lib/motion";
 
 type Tab = "facts" | "timeline" | "impact" | "graph";
@@ -66,12 +67,7 @@ export function EntityPage() {
   const header = useMemo(
     () => (
       <div className="flex items-center gap-4">
-        <span
-          className="grid h-12 w-12 flex-none place-items-center rounded-[12px]"
-          style={{ color: "var(--color-brass)", background: "var(--brass-wash)", border: "1px solid color-mix(in oklab, var(--color-brass) 24%, transparent)" }}
-        >
-          <KindGlyph kind={kind} width={22} height={22} />
-        </span>
+        <SealAvatar kind={kind} size={50} />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[22px] font-600 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
             {decoded}
@@ -99,7 +95,7 @@ export function EntityPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[860px] px-4 pb-24 pt-6 md:px-6">
+    <div className="mx-auto w-full max-w-[920px] px-4 pb-24 pt-6 md:px-6">
       {header}
 
       {/* segmented nav attached to the entity */}
@@ -162,7 +158,7 @@ export function EntityPage() {
               )}
               {tab === "impact" && <Impact name={decoded} depth={depth} setDepth={setDepth} />}
               {tab === "graph" && (
-                <div className="h-[62vh] overflow-hidden rounded-[14px]" style={{ border: "1px solid var(--color-line)" }}>
+                <div className="h-[68vh] overflow-hidden rounded-[14px]" style={{ border: "1px solid var(--color-line)" }}>
                   <GraphView entity={decoded} embedded />
                 </div>
               )}

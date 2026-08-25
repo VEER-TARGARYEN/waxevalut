@@ -9,6 +9,7 @@ import { ProvenanceDrawer } from "@/components/provenance/ProvenanceDrawer";
 import { MobileAgentBar } from "./MobileAgentBar";
 import { AmbientShader } from "./AmbientShader";
 import { BottomDock } from "./BottomDock";
+import { SideRail } from "./SideRail";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AmbientShader />
       <Header />
       <MobileAgentBar />
+      <SideRail />
       <main className="flex-1">{children}</main>
       <BottomDock />
       <CommandPalette />
