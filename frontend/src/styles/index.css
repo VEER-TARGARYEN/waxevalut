@@ -83,9 +83,17 @@ body,
   height: 100%;
 }
 
+/* The base colour lives on <html>, NOT <body>. The AmbientShader canvas sits at z-index -10
+   inside #root; if <body> also painted an opaque background it would cover the shader on
+   every page. With the ground on <html> the shader composites over it and shows through
+   everywhere. If WebGL is unavailable the shader no-ops and this solid charcoal remains. */
+html {
+  background: var(--color-base);
+}
+
 body {
   margin: 0;
-  background: var(--color-base);
+  background: transparent;
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -93,12 +101,10 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01";
-  /* Solid base only — the animated WebGL AmbientShader paints the living ground on top of
-     this. If WebGL is unavailable the shader no-ops and this solid charcoal is the fallback. */
 }
 
 ::selection {
-  background: rgba(224, 168, 96, 0.24);
+  background: color-mix(in oklab, var(--color-brass) 30%, transparent);
   color: #fff;
 }
 

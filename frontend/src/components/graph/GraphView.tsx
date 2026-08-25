@@ -216,10 +216,14 @@ export function GraphView({ entity, embedded = false }: { entity: string; embedd
     <div
       className="relative h-full w-full overflow-hidden"
       style={{
-        // a light "map" canvas: warm paper with a faint dot grid
-        background: "#f4f1ea",
+        // A light "map" canvas: warm paper with a faint dot grid. Deliberately slightly
+        // translucent and tinted with the active accent, so the themed ambient background
+        // bleeds through at the edges and the graph belongs to the same world as the rest
+        // of the app — while staying light enough to read the pins against.
+        background:
+          "linear-gradient(color-mix(in oklab, var(--color-brass) 7%, rgba(244,241,234,0.93)), color-mix(in oklab, var(--color-brass) 4%, rgba(244,241,234,0.95)))",
         backgroundImage:
-          "radial-gradient(circle, rgba(60,54,44,0.07) 1px, transparent 1.4px), radial-gradient(120% 90% at 50% 0%, rgba(202,161,94,0.10), transparent 60%)",
+          "radial-gradient(circle, rgba(60,54,44,0.07) 1px, transparent 1.4px), radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, var(--color-brass) 22%, transparent), transparent 60%)",
         backgroundSize: "22px 22px, 100% 100%",
       }}
     >

@@ -28,39 +28,67 @@ float fbm(vec2 p){
   for(int i=0;i<5;i++){ v += a*noise(p); p *= 2.03; a *= 0.5; }
   return v;
 }
+// ── hue helpers: build a themed palette from the single accent colour ──
+vec3 rgb2hsv(vec3 c){
+  vec4 K = vec4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+  vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+  vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+  float d = q.x - min(q.w, q.y);
+  return vec3(abs(q.z + (q.w - q.y) / (6.0*d + 1e-10)), d / (q.x + 1e-10), q.x);
+}
+vec3 hsv2rgb(vec3 c){
+  vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+// shift the accent's hue by d turns (0..1), keeping it vivid
+vec3 shiftHue(vec3 base, float d, float sat, float val){
+  vec3 h = rgb2hsv(base);
+  return hsv2rgb(vec3(fract(h.x + d), clamp(h.y * sat, 0.0, 1.0), clamp(h.z * val, 0.0, 1.0)));
+}
+
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res.xy;
   vec2 p = uv * vec2(u_res.x/u_res.y, 1.0) * 1.7;
-  float t = u_time * 0.03;
+  float t = u_time * 0.035;
 
   // domain warp for slow, organic flow
   vec2 q = vec2(fbm(p + t), fbm(p + vec2(5.2, 1.3) - t*0.8));
-  float n  = fbm(p + 1.8*q + t*0.5);
+  float n  = fbm(p + 1.9*q + t*0.5);
   float n2 = fbm(p*1.25 + vec2(2.7,9.1) - t*0.7);
+  float n3 = fbm(p*0.85 + vec2(8.4,3.6) + t*0.45);
 
-  vec3 base  = vec3(0.043, 0.049, 0.058);   // ~#0b0c0e charcoal
-  vec3 brass = u_accent;                    // active accent theme
-  // complementary cool tone, derived from the accent so every theme stays coherent
-  vec3 blue  = mix(vec3(0.40, 0.56, 0.78), u_accent.bgr, 0.45);
+  vec3 base = vec3(0.043, 0.049, 0.058);   // ~#0b0c0e charcoal ground
 
-  // sharper, brighter blooms so the field is clearly alive
-  float glow  = smoothstep(0.48, 0.92, n);
-  float glow2 = smoothstep(0.50, 0.90, n2);
+  // a three-hue palette derived from the accent: the accent itself, a near-analogous
+  // partner, and a far complement. Every theme therefore paints a different sky, not a
+  // recolour of the same one.
+  vec3 cA = u_accent;
+  vec3 cB = shiftHue(u_accent,  0.13, 1.15, 1.05);
+  vec3 cC = shiftHue(u_accent, -0.42, 1.00, 0.95);
+
+  // bold blooms — squared falloff keeps them shapely rather than muddy
+  float g1 = smoothstep(0.44, 0.90, n);
+  float g2 = smoothstep(0.46, 0.88, n2);
+  float g3 = smoothstep(0.50, 0.92, n3);
   vec3 col = base
-    + brass * glow  * glow  * 0.30
-    + blue  * glow2 * glow2 * 0.18;
+    + cA * g1 * g1 * 0.62
+    + cB * g2 * g2 * 0.42
+    + cC * g3 * g3 * 0.30;
 
-  // two large, slowly drifting blooms (a warm one, a cool one) for visible movement
-  vec2 warm = vec2(0.28 + 0.16*sin(t*0.6), 0.30 + 0.12*cos(t*0.5));
-  vec2 cool = vec2(0.78 + 0.14*cos(t*0.4), 0.72 + 0.15*sin(t*0.45));
-  col += brass * 0.12 * smoothstep(0.55, 0.0, distance(uv, warm));
-  col += blue  * 0.09 * smoothstep(0.6, 0.0, distance(uv, cool));
+  // three large drifting light sources for unmistakable movement
+  vec2 l1 = vec2(0.26 + 0.18*sin(t*0.60), 0.30 + 0.14*cos(t*0.50));
+  vec2 l2 = vec2(0.80 + 0.16*cos(t*0.40), 0.70 + 0.17*sin(t*0.45));
+  vec2 l3 = vec2(0.52 + 0.22*sin(t*0.31), 0.88 + 0.12*cos(t*0.37));
+  col += cA * 0.30 * smoothstep(0.52, 0.0, distance(uv, l1));
+  col += cB * 0.24 * smoothstep(0.58, 0.0, distance(uv, l2));
+  col += cC * 0.20 * smoothstep(0.50, 0.0, distance(uv, l3));
 
-  // top-left brass keylight, matching the app's light source
-  col += brass * 0.07 * smoothstep(0.9, 0.0, distance(uv, vec2(0.08, -0.05)));
+  // accent keylight from the app's top-left light source
+  col += cA * 0.16 * smoothstep(0.95, 0.0, distance(uv, vec2(0.06, -0.05)));
 
-  // gentle vignette so edges settle into black
-  col *= mix(0.72, 1.0, smoothstep(1.3, 0.2, distance(uv, vec2(0.5))));
+  // vignette so the edges settle and centre content stays readable
+  col *= mix(0.60, 1.0, smoothstep(1.35, 0.15, distance(uv, vec2(0.5))));
 
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -156,8 +184,11 @@ export function AmbientShader() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
-      const ext = gl.getExtension("WEBGL_lose_context");
-      ext?.loseContext();
+      // NOTE: deliberately no WEBGL_lose_context here. Forcing context loss on cleanup
+      // permanently poisons the canvas: React StrictMode mounts effects twice in dev, and
+      // the second run would getContext() the same already-lost context, fail to link, and
+      // bail — leaving a 0x0 canvas and no visible background. The canvas lives for the
+      // app's lifetime; the browser reclaims the context with the element.
     };
   }, []);
 
@@ -166,7 +197,9 @@ export function AmbientShader() {
       ref={ref}
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
-      style={{ opacity: 1 }}
+      // slightly translucent so the field composites over the charcoal ground on <html>
+      // rather than replacing it — keeps text contrast honest while the colour stays bold
+      style={{ opacity: 0.82 }}
     />
   );
 }
