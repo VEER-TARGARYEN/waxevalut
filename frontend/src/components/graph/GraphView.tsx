@@ -96,9 +96,12 @@ export function GraphView({ entity, embedded = false }: { entity: string; embedd
       const inst = cy({
         container: containerRef.current,
         style: stylesheet(),
-        minZoom: 0.2,
-        maxZoom: 3,
-        wheelSensitivity: 0.2,
+        minZoom: 0.15,
+        maxZoom: 4,
+        // Google-Maps-like feel: responsive wheel-zoom toward the cursor, free drag-pan.
+        wheelSensitivity: 0.4,
+        boxSelectionEnabled: false,
+        autoungrabify: false,
       });
       cyRef.current = inst;
       setReady(true);
@@ -121,6 +124,11 @@ export function GraphView({ entity, embedded = false }: { entity: string; embedd
           clearHighlight(inst);
           setSelected(null);
         }
+      });
+      // double-click to zoom toward a point (maps behavior)
+      inst.on("dbltap", (e) => {
+        const z = Math.min(inst.zoom() * 1.7, 4);
+        inst.animate({ zoom: { level: z, position: e.position }, duration: 220 });
       });
     });
     return () => {
@@ -154,7 +162,28 @@ export function GraphView({ entity, embedded = false }: { entity: string; embedd
       inst.elements().remove();
       inst.add(els);
     });
-    inst.layout({ name: "fcose", quality: "default", animate: true, animationDuration: 400, nodeSeparation: 90, idealEdgeLength: 70, nodeRepulsion: 6000 } as never).run();
+    // "Making" animation: nodes start scattered and settle into the force layout, then the
+    // whole graph fades in as it assembles.
+    inst.nodes().style("opacity", 0);
+    inst.edges().style("opacity", 0);
+    const layout = inst.layout({
+      name: "fcose",
+      quality: "proof",
+      randomize: true, // start scattered so the settle reads as the graph "building"
+      animate: true,
+      animationDuration: 900,
+      animationEasing: "ease-out",
+      nodeSeparation: 95,
+      idealEdgeLength: 75,
+      nodeRepulsion: 6500,
+      fit: true,
+      padding: 44,
+    } as never);
+    layout.one("layoutstart", () => {
+      inst.nodes().animate({ style: { opacity: 1 } }, { duration: 500, easing: "ease-out" });
+      inst.edges().animate({ style: { opacity: 0.7 } }, { duration: 700, easing: "ease-out" });
+    });
+    layout.run();
     setSelected(null);
   }, [data]);
 
@@ -209,21 +238,21 @@ export function GraphView({ entity, embedded = false }: { entity: string; embedd
       )}
 
       {/* legend */}
-      <div className="absolute bottom-4 left-4 z-10 flex items-center gap-3 rounded-[9px] px-3 py-2 text-[10.5px]" style={{ background: "color-mix(in oklab, var(--color-surface-1) 85%, transparent)", border: "1px solid var(--color-line)", color: "var(--color-ink-4)" }}>
+      <div className="absolute bottom-10 left-4 z-10 flex items-center gap-3 rounded-[9px] px-3 py-2 text-[10.5px]" style={{ background: "color-mix(in oklab, var(--color-surface-1) 85%, transparent)", border: "1px solid var(--color-line)", color: "var(--color-ink-4)" }}>
         <LegendDot color="#3a4a5a" label="Entity" shape="circle" />
         <LegendDot color={CLASS_META.internal.color} label="Fact" shape="square" />
         <LegendDot color="#3a3f47" label="Source" shape="diamond" />
       </div>
 
       {/* minimal controls */}
-      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-1 rounded-[10px] p-1" style={{ background: "color-mix(in oklab, var(--color-surface-1) 85%, transparent)", border: "1px solid var(--color-line)" }}>
+      <div className="absolute bottom-10 right-4 z-10 flex items-center gap-1 rounded-[10px] p-1" style={{ background: "color-mix(in oklab, var(--color-surface-1) 85%, transparent)", border: "1px solid var(--color-line)" }}>
         <IconButton label="Zoom in" onClick={() => zoom(1.25)}><ZoomIn width={16} height={16} /></IconButton>
         <IconButton label="Zoom out" onClick={() => zoom(0.8)}><ZoomOut width={16} height={16} /></IconButton>
         <IconButton label="Fit graph (F)" onClick={fit}><Fit width={16} height={16} /></IconButton>
       </div>
 
       {data && data.redacted_count > 0 && (
-        <div className="absolute bottom-16 right-4 z-10 rounded-[8px] px-2.5 py-1.5 text-[11px]" style={{ background: "var(--color-surface-2)", border: "1px dashed var(--color-line-strong)", color: "var(--color-ink-4)" }}>
+        <div className="absolute bottom-24 right-4 z-10 rounded-[8px] px-2.5 py-1.5 text-[11px]" style={{ background: "var(--color-surface-2)", border: "1px dashed var(--color-line-strong)", color: "var(--color-ink-4)" }}>
           {data.redacted_count} node{data.redacted_count > 1 ? "s" : ""} hidden by clearance
         </div>
       )}

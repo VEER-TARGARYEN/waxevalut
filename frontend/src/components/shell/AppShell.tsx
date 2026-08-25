@@ -7,13 +7,17 @@ import { CommandPalette } from "./CommandPalette";
 import { ObserveModal } from "@/components/observe/ObserveModal";
 import { ProvenanceDrawer } from "@/components/provenance/ProvenanceDrawer";
 import { MobileAgentBar } from "./MobileAgentBar";
+import { AmbientShader } from "./AmbientShader";
+import { BottomDock } from "./BottomDock";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col">
+      <AmbientShader />
       <Header />
       <MobileAgentBar />
       <main className="flex-1">{children}</main>
+      <BottomDock />
       <CommandPalette />
       <ObserveModal />
       <ProvenanceDrawer />
