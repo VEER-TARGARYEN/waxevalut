@@ -14,10 +14,16 @@ authorized context, and provenance**.
 
 | | |
 |---|---|
-| **Live demo** | _deploy link here_ (see [DEPLOY.md](DEPLOY.md) — ~3 min on Vercel) |
+| **Live demo** | https://waxevalut.vercel.app |
+| **Live API** | https://waxevalut-api.onrender.com/api/health (FastAPI → CognoDB) |
 | **Walkthrough** | _recording link here_ |
 | **Backend** | FastAPI + official Neo4j driver → CognoDB · [`backend/`](backend/) |
 | **Frontend** | React + Vite + TypeScript · [`frontend/`](frontend/) |
+
+> The API is deployed on Render's free tier and answers live from CognoDB (try the health
+> link — it may cold-start for ~50s if idle). The frontend ships with a faithful mock layer
+> so the demo works with zero cold-start; set `VITE_USE_MOCK=0` + `VITE_API_BASE` to wire it
+> to the live API. See [DEPLOY.md](DEPLOY.md).
 
 ## What it demonstrates
 
