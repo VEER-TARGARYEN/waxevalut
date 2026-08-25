@@ -118,6 +118,12 @@ export const Check = (p: P) => (
     <path d="M5 12.5l4.5 4.5L19 7" />
   </svg>
 );
+export const Gear = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M12 3.2v2.2M12 18.6v2.2M20.8 12h-2.2M5.4 12H3.2M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6M18.2 18.2l-1.6-1.6M7.4 7.4L5.8 5.8" />
+  </svg>
+);
 export const Return = (p: P) => (
   <svg {...base(p)}>
     <path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 0 0-10h-1" />

@@ -7,11 +7,14 @@
  *  static frame under prefers-reduced-motion. Dependency-free (raw WebGL1).
  */
 import { useEffect, useRef } from "react";
+import { getTheme } from "@/lib/themes";
+import { useSettings } from "@/store/settings";
 
 const FRAG = `
 precision highp float;
 uniform vec2 u_res;
 uniform float u_time;
+uniform vec3 u_accent;
 
 float hash(vec2 p){ p = fract(p*vec2(123.34, 345.45)); p += dot(p, p+34.345); return fract(p.x*p.y); }
 float noise(vec2 p){
@@ -36,8 +39,9 @@ void main(){
   float n2 = fbm(p*1.25 + vec2(2.7,9.1) - t*0.7);
 
   vec3 base  = vec3(0.043, 0.049, 0.058);   // ~#0b0c0e charcoal
-  vec3 brass = vec3(0.878, 0.659, 0.376);   // wax-seal brass
-  vec3 blue  = vec3(0.40, 0.56, 0.78);
+  vec3 brass = u_accent;                    // active accent theme
+  // complementary cool tone, derived from the accent so every theme stays coherent
+  vec3 blue  = mix(vec3(0.40, 0.56, 0.78), u_accent.bgr, 0.45);
 
   // sharper, brighter blooms so the field is clearly alive
   float glow  = smoothstep(0.48, 0.92, n);
@@ -65,6 +69,15 @@ const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`
 
 export function AmbientShader() {
   const ref = useRef<HTMLCanvasElement>(null);
+  const themeId = useSettings((s) => s.theme);
+  const fpsPref = useSettings((s) => s.fps);
+  const detected = useSettings((s) => s.detectedFps);
+
+  // read through refs so theme/fps changes take effect without tearing down the GL context
+  const accentRef = useRef<[number, number, number]>(getTheme(themeId).shader);
+  const fpsRef = useRef(60);
+  accentRef.current = getTheme(themeId).shader;
+  fpsRef.current = fpsPref === "auto" ? detected ?? 60 : fpsPref;
 
   useEffect(() => {
     const canvas = ref.current;
@@ -96,6 +109,7 @@ export function AmbientShader() {
 
     const uRes = gl.getUniformLocation(prog, "u_res");
     const uTime = gl.getUniformLocation(prog, "u_time");
+    const uAccent = gl.getUniformLocation(prog, "u_accent");
 
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const resize = () => {
@@ -112,26 +126,29 @@ export function AmbientShader() {
 
     let raf = 0;
     let last = 0;
-    const frameMs = 1000 / 40; // cap ~40fps
     const start = performance.now();
+
+    const paint = (t: number) => {
+      const [r, g, b] = accentRef.current;
+      resize();
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, t);
+      gl.uniform3f(uAccent, r, g, b);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
 
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
       if (document.hidden) return;
-      if (now - last < frameMs) return;
+      // frame budget follows the live setting (auto-matched to the display, or pinned)
+      const frameMs = 1000 / Math.max(1, fpsRef.current);
+      if (now - last < frameMs - 0.5) return;
       last = now;
-      resize();
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform1f(uTime, (now - start) / 1000);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      paint((now - start) / 1000);
     };
 
     if (reduce) {
-      // one static frame, no animation loop
-      resize();
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform1f(uTime, 12.0);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      paint(12.0); // one static frame, no animation loop
     } else {
       raf = requestAnimationFrame(draw);
     }

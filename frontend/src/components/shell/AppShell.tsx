@@ -10,7 +10,8 @@ import { MobileAgentBar } from "./MobileAgentBar";
 import { AmbientShader } from "./AmbientShader";
 import { BottomDock } from "./BottomDock";
 import { SideRail } from "./SideRail";
-import { ActivityRail } from "./ActivityRail";
+import { BriefingRail } from "./BriefingRail";
+import { SettingsPanel } from "./SettingsPanel";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -19,12 +20,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Header />
       <MobileAgentBar />
       <SideRail />
-      <ActivityRail />
+      <BriefingRail />
       <main className="flex-1">{children}</main>
       <BottomDock />
       <CommandPalette />
       <ObserveModal />
       <ProvenanceDrawer />
+      <SettingsPanel />
     </div>
   );
 }

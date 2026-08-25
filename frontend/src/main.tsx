@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "framer-motion";
 import App from "./App";
 import "./styles/index.css";
+import { initSettings } from "./store/settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +26,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+initSettings();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

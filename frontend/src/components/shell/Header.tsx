@@ -5,7 +5,8 @@ import { Wordmark } from "./Logo";
 import { AgentSwitcher } from "./AgentSwitcher";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { useApp } from "@/store/app";
-import { Plus } from "@/components/ui/icons";
+import { useSettings } from "@/store/settings";
+import { Plus, Gear } from "@/components/ui/icons";
 import { Kbd } from "@/components/ui/primitives";
 
 function Breadcrumb() {
@@ -32,6 +33,7 @@ function Breadcrumb() {
 export function Header() {
   const openObserve = useApp((s) => s.openObserve);
   const setPalette = useApp((s) => s.setPalette);
+  const setSettingsOpen = useSettings((s) => s.setSettingsOpen);
 
   return (
     <header
@@ -66,6 +68,17 @@ export function Header() {
         >
           <Plus width={15} height={15} />
           <span className="hidden sm:inline">Observation</span>
+        </button>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Settings"
+          title="Settings — theme and motion"
+          className="grid h-8 w-8 place-items-center rounded-[9px] transition-colors active:scale-90"
+          style={{ color: "var(--color-ink-3)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-surface-2)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        >
+          <Gear width={17} height={17} />
         </button>
         <ConnectionStatus />
       </div>
