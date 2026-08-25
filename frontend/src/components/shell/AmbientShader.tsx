@@ -27,29 +27,36 @@ float fbm(vec2 p){
 }
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res.xy;
-  vec2 p = uv * vec2(u_res.x/u_res.y, 1.0) * 1.6;
-  float t = u_time * 0.018;
+  vec2 p = uv * vec2(u_res.x/u_res.y, 1.0) * 1.7;
+  float t = u_time * 0.03;
 
   // domain warp for slow, organic flow
   vec2 q = vec2(fbm(p + t), fbm(p + vec2(5.2, 1.3) - t*0.8));
-  float n = fbm(p + 1.6*q + t*0.4);
-  float n2 = fbm(p*1.25 + vec2(2.7,9.1) - t*0.6);
+  float n  = fbm(p + 1.8*q + t*0.5);
+  float n2 = fbm(p*1.25 + vec2(2.7,9.1) - t*0.7);
 
-  vec3 base  = vec3(0.041, 0.047, 0.055);   // ~#0b0c0e charcoal
+  vec3 base  = vec3(0.043, 0.049, 0.058);   // ~#0b0c0e charcoal
   vec3 brass = vec3(0.878, 0.659, 0.376);   // wax-seal brass
-  vec3 blue  = vec3(0.42, 0.58, 0.77);
+  vec3 blue  = vec3(0.40, 0.56, 0.78);
 
-  float glow = smoothstep(0.52, 0.98, n);
-  float glow2 = smoothstep(0.55, 0.95, n2);
+  // sharper, brighter blooms so the field is clearly alive
+  float glow  = smoothstep(0.48, 0.92, n);
+  float glow2 = smoothstep(0.50, 0.90, n2);
   vec3 col = base
-    + brass * glow  * 0.085
-    + blue  * glow2 * 0.035;
+    + brass * glow  * glow  * 0.30
+    + blue  * glow2 * glow2 * 0.18;
+
+  // two large, slowly drifting blooms (a warm one, a cool one) for visible movement
+  vec2 warm = vec2(0.28 + 0.16*sin(t*0.6), 0.30 + 0.12*cos(t*0.5));
+  vec2 cool = vec2(0.78 + 0.14*cos(t*0.4), 0.72 + 0.15*sin(t*0.45));
+  col += brass * 0.12 * smoothstep(0.55, 0.0, distance(uv, warm));
+  col += blue  * 0.09 * smoothstep(0.6, 0.0, distance(uv, cool));
 
   // top-left brass keylight, matching the app's light source
-  col += brass * 0.05 * smoothstep(0.9, 0.0, distance(uv, vec2(0.1, -0.05)));
+  col += brass * 0.07 * smoothstep(0.9, 0.0, distance(uv, vec2(0.08, -0.05)));
 
   // gentle vignette so edges settle into black
-  col *= mix(0.82, 1.0, smoothstep(1.25, 0.25, distance(uv, vec2(0.5))));
+  col *= mix(0.72, 1.0, smoothstep(1.3, 0.2, distance(uv, vec2(0.5))));
 
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -105,7 +112,7 @@ export function AmbientShader() {
 
     let raf = 0;
     let last = 0;
-    const frameMs = 1000 / 30; // cap ~30fps
+    const frameMs = 1000 / 40; // cap ~40fps
     const start = performance.now();
 
     const draw = (now: number) => {
@@ -142,7 +149,7 @@ export function AmbientShader() {
       ref={ref}
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
-      style={{ opacity: 0.9 }}
+      style={{ opacity: 1 }}
     />
   );
 }
