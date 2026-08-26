@@ -109,7 +109,8 @@ export function BriefingRail() {
   const { data } = useEntityBrowse();
   const items = data ?? [];
   const [i, setI] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const paused = revealed; // don't advance the story while it's being read
   const nav = useNavigate();
 
   const stories: Story[] = useMemo(
@@ -140,15 +141,52 @@ export function BriefingRail() {
   const next = stories[(i + 1) % stories.length];
 
   return (
-    <aside
+    <div
       aria-label="Live briefing"
-      className="fixed right-3 top-1/2 z-30 hidden w-[248px] -translate-y-1/2 xl:block"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className="fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 lg:block"
+      // hide when not in use, reveal when the pointer comes near the right edge — like the
+      // search dock. Off by default so it never overlaps page content; a persistent edge tab
+      // invites it in, and it fades away on mouse-leave.
+      onMouseEnter={() => setRevealed(true)}
+      onMouseLeave={() => setRevealed(false)}
     >
-      <div
-        className="overflow-hidden rounded-[16px]"
-        style={{ background: "color-mix(in oklab, var(--color-surface-1) 82%, transparent)", border: "1px solid var(--color-line)", backdropFilter: "blur(10px)", boxShadow: "var(--shadow-panel)" }}
+      {/* persistent edge tab (visible only while hidden) */}
+      <button
+        onClick={() => setRevealed(true)}
+        className="absolute right-1.5 top-1/2 flex -translate-y-1/2 flex-col items-center gap-2 rounded-full px-1.5 py-3"
+        style={{
+          background: "color-mix(in oklab, var(--color-surface-1) 80%, transparent)",
+          border: "1px solid var(--color-line)",
+          backdropFilter: "blur(8px)",
+          opacity: revealed ? 0 : 1,
+          pointerEvents: revealed ? "none" : "auto",
+          transition: "opacity 200ms var(--ease-out)",
+        }}
+        aria-label="Show live briefing"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: "var(--color-ok)" }} />
+          <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: "var(--color-ok)" }} />
+        </span>
+        <span className="text-[9px] font-600 uppercase tracking-[0.2em]" style={{ writingMode: "vertical-rl", color: "var(--color-ink-3)" }}>
+          Ledger
+        </span>
+      </button>
+
+      {/* the briefing card — base state driven by inline styles + CSS transition so it is
+          reliably hidden by default regardless of the animation engine */}
+      <aside
+        className="mr-3 w-[248px] overflow-hidden rounded-[16px]"
+        style={{
+          background: "color-mix(in oklab, var(--color-surface-1) 92%, transparent)",
+          border: "1px solid var(--color-line-strong)",
+          backdropFilter: "blur(14px)",
+          boxShadow: "var(--shadow-pop)",
+          opacity: revealed ? 1 : 0,
+          transform: revealed ? "translateX(0)" : "translateX(16px)",
+          pointerEvents: revealed ? "auto" : "none",
+          transition: "opacity 320ms var(--ease-out), transform 320ms var(--ease-out)",
+        }}
       >
         {/* masthead */}
         <div className="flex items-center gap-2 px-3.5 py-2.5" style={{ borderBottom: "1px solid var(--color-line)" }}>
@@ -222,7 +260,7 @@ export function BriefingRail() {
             <ArrowRight width={12} height={12} style={{ color: "var(--color-ink-4)" }} />
           </button>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </div>
   );
 }

@@ -11,6 +11,7 @@ import type { Agent } from "@/lib/api/types";
 import { useApp } from "@/store/app";
 import { DUR, EASE_OUT } from "@/lib/motion";
 import { ChevronDown, Check } from "@/components/ui/icons";
+import { AgentAvatar } from "@/components/ui/AgentAvatar";
 
 const CLEARANCE_LABEL = ["Public only", "Internal", "PII clearance", "Secret clearance"];
 const CLEARANCE_COLOR = [
@@ -21,27 +22,8 @@ const CLEARANCE_COLOR = [
 ];
 
 function Ident({ agent, size = 30 }: { agent: Agent; size?: number }) {
-  const color = CLEARANCE_COLOR[agent.clearance] ?? "var(--color-public)";
-  const initials = agent.name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  return (
-    <span
-      className="relative inline-grid place-items-center rounded-[8px] text-[11px] font-600"
-      style={{
-        width: size,
-        height: size,
-        color,
-        background: `color-mix(in oklab, ${color} 14%, var(--color-surface-3))`,
-        border: `1px solid color-mix(in oklab, ${color} 40%, transparent)`,
-      }}
-    >
-      {initials}
-    </span>
-  );
+  // a generated sigil, seeded by the agent id and tinted by clearance — never initials
+  return <AgentAvatar id={agent.id} clearance={agent.clearance} size={size} rounded={8} />;
 }
 
 export function AgentSwitcher() {
